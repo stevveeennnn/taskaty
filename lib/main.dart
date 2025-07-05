@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:todo_app/data/hive_data_store.dart';
 import 'package:todo_app/models/task.dart';
-import 'package:todo_app/views/home/home_view.dart';
-import 'package:todo_app/views/tasks/widgets/task_view.dart';
-// import 'package:todo_app/views/tasks/widgets/task_view.dart';
+import 'package:todo_app/views/tasks/widgets/task_details.dart';
 
 Future<void> main() async {
   // initializing hive
@@ -78,7 +76,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const TaskView(),
+      home: const TaskDetails(),
     );
   }
 }

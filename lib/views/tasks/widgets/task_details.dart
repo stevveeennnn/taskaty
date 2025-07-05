@@ -65,9 +65,9 @@ class MainTaskDetailsActivity extends StatelessWidget {
           20.h,
 
           // task title
-          CustomTextField(),
+          CustomTextField(isForDescription: false,),
           20.h,
-          CustomTextField(),
+          CustomTextField(isForDescription: true,),
 
           20.h,
 
@@ -118,7 +118,7 @@ class MainTaskDetailsActivity extends StatelessWidget {
                 maxDateTime: DateTime(2030, 12, 31),
                 minDateTime: DateTime.now(),
                 onConfirm: (dateTime, _) {
-                  print("Selected date: $dateTime"); // استخدم القيمة هنا
+                  print("Selected date: $dateTime");
                 },
               );
             },

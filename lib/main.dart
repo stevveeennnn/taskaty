@@ -3,6 +3,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:todo_app/data/hive_data_store.dart';
 import 'package:todo_app/models/task.dart';
 import 'package:todo_app/views/home/home_view.dart';
+import 'package:todo_app/views/tasks/widgets/task_view.dart';
 // import 'package:todo_app/views/tasks/widgets/task_view.dart';
 
 Future<void> main() async {
@@ -19,7 +20,7 @@ Future<void> main() async {
 }
 
 class BaseWidget extends InheritedWidget {
-  BaseWidget({Key? key, required this.child}) : super(key: key, child: child);
+  BaseWidget({super.key, required this.child}) : super(child: child);
   final HiveDataStore dataStore = HiveDataStore();
   final Widget child;
 
@@ -77,7 +78,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeView(),
+      home: const TaskView(),
     );
   }
 }

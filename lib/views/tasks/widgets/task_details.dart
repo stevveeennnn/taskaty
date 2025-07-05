@@ -9,31 +9,13 @@ import 'package:todo_app/views/tasks/widgets/task_details_app_bar.dart';
 import 'package:todo_app/views/tasks/widgets/date_time_selection.dart';
 
 class TaskDetails extends StatefulWidget {
-  const TaskDetails({
-    super.key,
-    required this.titleTaskController,
-    required this.descriptionTaskController,
-    required this.task,
-  });
-
-  final TextEditingController? titleTaskController;
-  final TextEditingController? descriptionTaskController;
-  final Task? task;
+  const TaskDetails({super.key});
 
   @override
   State<TaskDetails> createState() => _TaskDetailsState();
 }
 
 class _TaskDetailsState extends State<TaskDetails> {
-  bool isTaskExist() {
-    if (widget.titleTaskController?.text == null &&
-        widget.titleTaskController?.text == null) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -48,14 +30,9 @@ class _TaskDetailsState extends State<TaskDetails> {
             width: double.infinity,
             child: Column(
               children: [
-                _buildTopSideText(textTheme, isTaskExist),
+                _buildTopSideText(textTheme),
 
-                MainTaskDetailsActivity(
-                  textTheme: textTheme,
-                  controller: widget.titleTaskController, // ✅ هنا
-                  descriptionTaskController:
-                      widget.descriptionTaskController, // ✅ وهنا
-                ),
+                MainTaskDetailsActivity(textTheme: textTheme),
               ],
             ),
           ),
@@ -66,16 +43,9 @@ class _TaskDetailsState extends State<TaskDetails> {
 }
 
 class MainTaskDetailsActivity extends StatelessWidget {
-  const MainTaskDetailsActivity({
-    super.key,
-    required this.textTheme,
-    required this.controller,
-    required this.descriptionTaskController,
-  });
+  const MainTaskDetailsActivity({super.key, required this.textTheme});
 
   final TextTheme textTheme;
-  final TextEditingController? controller;
-  final TextEditingController? descriptionTaskController;
 
   @override
   Widget build(BuildContext context) {
@@ -95,12 +65,9 @@ class MainTaskDetailsActivity extends StatelessWidget {
           20.h,
 
           // task title
-          CustomTextField(controller: controller),
+          CustomTextField(),
           20.h,
-          CustomTextField(
-            controller: descriptionTaskController,
-            isForDescription: true,
-          ),
+          CustomTextField(),
 
           20.h,
 
@@ -207,7 +174,7 @@ class MainTaskDetailsActivity extends StatelessWidget {
   }
 }
 
-Widget _buildTopSideText(TextTheme textTheme, bool Function() isTaskExist) {
+Widget _buildTopSideText(TextTheme textTheme) {
   return SizedBox(
     width: double.infinity,
     height: 100,
@@ -216,10 +183,7 @@ Widget _buildTopSideText(TextTheme textTheme, bool Function() isTaskExist) {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         RichText(
-          text: TextSpan(
-            text: isTaskExist() ? AppStr.addNewTask : AppStr.updateTaskString,
-            style: textTheme.titleLarge,
-          ),
+          text: TextSpan(text: AppStr.addNewTask, style: textTheme.titleLarge),
         ),
       ],
     ),

@@ -7,6 +7,3 @@ class AppColors {
     Color.fromARGB(255, 234, 177, 85),
   ];
 }
-
-// Color(0xFF4568dc),
-// Color(0xFFb06ab3),

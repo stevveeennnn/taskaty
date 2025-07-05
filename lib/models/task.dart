@@ -1,9 +1,28 @@
-import 'package:hive_flutter/adapters.dart';
+import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
+
 part 'task.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class Task extends HiveObject {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  String title;
+
+  @HiveField(2)
+  String subTitle;
+
+  @HiveField(3)
+  DateTime createdAtTime;
+
+  @HiveField(4)
+  DateTime createdAtDate;
+
+  @HiveField(5)
+  bool isCompleted;
+
   Task({
     required this.id,
     required this.title,
@@ -13,31 +32,38 @@ class Task extends HiveObject {
     required this.isCompleted,
   });
 
-  @HiveField(0)
-  final String id;
-  @HiveField(1)
-  String title;
-  @HiveField(2)
-  String subTitle;
-  @HiveField(3)
-  DateTime createdAtTime;
-  @HiveField(4)
-  DateTime createdAtDate;
-  @HiveField(5)
-  bool isCompleted;
-
   factory Task.create({
-    required String? title,
-    required String? subTitle,
-    DateTime? createdAtDate,
+    required String title,
+    required String subTitle,
+    required DateTime createdAtDate,
+    required DateTime createdAtTime,
+    bool isCompleted = false,
+  }) {
+    return Task(
+      id: Uuid().v1(),
+      title: title,
+      subTitle: subTitle,
+      createdAtTime: createdAtTime,
+      createdAtDate: createdAtDate,
+      isCompleted: isCompleted,
+    );
+  }
+
+  Task copyWith({
+    String? id,
+    String? title,
+    String? subTitle,
     DateTime? createdAtTime,
-    required bool? isCompleted,
-  }) => Task(
-    id: const Uuid().v1(),
-    title: title ?? '',
-    subTitle: subTitle ?? '',
-    createdAtDate: createdAtDate ?? DateTime.now(),
-    createdAtTime: createdAtTime ?? DateTime.now(),
-    isCompleted: false,
-  );
+    DateTime? createdAtDate,
+    bool? isCompleted,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      subTitle: subTitle ?? this.subTitle,
+      createdAtTime: createdAtTime ?? this.createdAtTime,
+      createdAtDate: createdAtDate ?? this.createdAtDate,
+      isCompleted: isCompleted ?? this.isCompleted,
+    );
+  }
 }

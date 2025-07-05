@@ -1,191 +1,142 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cupertino_date_picker_fork/flutter_cupertino_date_picker_fork.dart';
-import 'package:todo_app/extensions/space_exc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo_app/bloc/task_state.dart';
 import 'package:todo_app/models/task.dart';
-import 'package:todo_app/utils/app_colors.dart';
-import 'package:todo_app/utils/app_str.dart';
-import 'package:todo_app/views/tasks/components/custom_text_field.dart';
-import 'package:todo_app/views/tasks/widgets/task_details_app_bar.dart';
-import 'package:todo_app/views/tasks/widgets/date_time_selection.dart';
+import 'package:todo_app/bloc/task_bloc.dart';
+import 'package:todo_app/bloc/task_event.dart';
 
 class TaskDetails extends StatefulWidget {
-  const TaskDetails({super.key});
+  final Task? task;
+  const TaskDetails({super.key, this.task});
 
   @override
   State<TaskDetails> createState() => _TaskDetailsState();
 }
 
 class _TaskDetailsState extends State<TaskDetails> {
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
+  DateTime? selectedDate;
+  TimeOfDay? selectedTime;
+  bool isCompleted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.task != null) {
+      titleController.text = widget.task!.title;
+      noteController.text = widget.task!.subTitle;
+      selectedDate = widget.task!.createdAtDate;
+      selectedTime = TimeOfDay.fromDateTime(widget.task!.createdAtTime);
+      isCompleted = widget.task!.isCompleted;
+    }
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    noteController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextTheme textTheme = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+    return BlocListener<TaskBloc, TaskState>(
+      listener: (context, state) {
+        if (state is TaskOperationSuccess) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.message)));
+        } else if (state is TaskOperationFailure) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.error)));
+        }
+      },
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: TaskDetailsAppBar(),
-        body: SingleChildScrollView(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                _buildTopSideText(textTheme),
-
-                MainTaskDetailsActivity(textTheme: textTheme),
-              ],
-            ),
-          ),
+        appBar: AppBar(
+          title: Text(widget.task == null ? 'New Task' : 'Edit Task'),
+          actions: [
+            if (widget.task != null)
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  context.read<TaskBloc>().add(DeleteTask(widget.task!));
+                  Navigator.pop(context);
+                },
+              ),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-class MainTaskDetailsActivity extends StatelessWidget {
-  const MainTaskDetailsActivity({super.key, required this.textTheme});
-
-  final TextTheme textTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 530,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Text(
-              AppStr.titleOfTitleTextField,
-              style: textTheme.headlineMedium,
-            ),
-          ),
-
-          20.h,
-
-          // task title
-          CustomTextField(isForDescription: false,),
-          20.h,
-          CustomTextField(isForDescription: true,),
-
-          20.h,
-
-          // time selection
-          DateTimeSelection(
-            title: AppStr.timeString,
-            textTheme: textTheme,
-            onTap: (BuildContext context) async {
-              final TimeOfDay? timeOfDay = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.now(),
-                builder: (BuildContext context, Widget? child) {
-                  return Theme(
-                    data: Theme.of(context).copyWith(
-                      colorScheme: const ColorScheme.light(
-                        primary: Colors.orange,
-                        onPrimary: Colors.white,
-                        onSurface: Colors.orange,
-                        secondary: Colors.orange,
-                        onSecondary: Colors.white,
-                      ),
-                      timePickerTheme: TimePickerThemeData(
-                        dialHandColor: Colors.orange,
-                        dialBackgroundColor: Colors.orangeAccent.withOpacity(
-                          0.1,
-                        ),
-                        entryModeIconColor: Colors.orange,
-                      ),
-                    ),
-                    child: child!,
+        body: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Title'),
+              ),
+              TextField(
+                controller: noteController,
+                decoration: InputDecoration(labelText: 'Note'),
+              ),
+              ListTile(
+                title: Text(selectedDate == null
+                    ? 'Select Date'
+                    : selectedDate!.toString().split(' ')[0]),
+                trailing: Icon(Icons.calendar_today),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
                   );
+                  if (date != null) setState(() => selectedDate = date);
                 },
-              );
-
-              if (timeOfDay != null) {
-                print("Selected Time: ${timeOfDay.format(context)}");
-              }
-            },
-          ),
-
-          // date selection
-          DateTimeSelection(
-            title: AppStr.dateString,
-            textTheme: textTheme,
-            onTap: (BuildContext context) {
-              DatePicker.showDatePicker(
-                context,
-                maxDateTime: DateTime(2030, 12, 31),
-                minDateTime: DateTime.now(),
-                onConfirm: (dateTime, _) {
-                  print("Selected date: $dateTime");
+              ),
+              ListTile(
+                title: Text(selectedTime == null
+                    ? 'Select Time'
+                    : selectedTime!.format(context)),
+                trailing: Icon(Icons.access_time),
+                onTap: () async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (time != null) setState(() => selectedTime = time);
                 },
-              );
-            },
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (titleController.text.isEmpty ||
+                      noteController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Please fill all fields')));
+                    return;
+                  }
+                  final task = Task.create(
+                    title: titleController.text,
+                    subTitle: noteController.text,
+                    createdAtDate: selectedDate ?? DateTime.now(),
+                    createdAtTime: DateTime.now().copyWith(
+                      hour: selectedTime?.hour ?? TimeOfDay.now().hour,
+                      minute: selectedTime?.minute ?? TimeOfDay.now().minute,
+                    ),
+                    isCompleted: isCompleted,
+                  );
+                  if (widget.task == null) {
+                    context.read<TaskBloc>().add(AddTask(task));
+                  } else {
+                    context.read<TaskBloc>().add(
+                        UpdateTask(task.copyWith(id: widget.task!.id)));
+                  }
+                  Navigator.pop(context);
+                },
+                child: Text('Save'),
+              ),
+            ],
           ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
-            child: Row(
-              children: [
-                MaterialButton(
-                  onPressed: () {},
-                  color: Colors.white,
-                  textColor: AppColors.primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.circular(10),
-                  ),
-                  minWidth: 150,
-                  height: 50,
-                  child: Row(
-                    children: [
-                      Icon(Icons.close_rounded),
-                      Padding(padding: EdgeInsetsGeometry.only(right: 5)),
-                      Text('Delete Task'),
-                    ],
-                  ),
-                ),
-
-                Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 10)),
-
-                MaterialButton(
-                  onPressed: () {},
-                  color: AppColors.primaryColor,
-                  textColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.circular(10),
-                  ),
-                  minWidth: 150,
-                  height: 50,
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_rounded),
-                      Padding(padding: EdgeInsetsGeometry.only(right: 5)),
-                      Text('Add Task'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-}
-
-Widget _buildTopSideText(TextTheme textTheme) {
-  return SizedBox(
-    width: double.infinity,
-    height: 100,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        RichText(
-          text: TextSpan(text: AppStr.addNewTask, style: textTheme.titleLarge),
-        ),
-      ],
-    ),
-  );
 }

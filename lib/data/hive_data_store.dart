@@ -1,38 +1,51 @@
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:todo_app/models/task.dart';
 
-
-// all the CRUD operations for hive db
 class HiveDataStore {
-  // boxName - string
   static const boxName = 'taskBox';
-
-  //our current box with all of the saved data inside - Box<Task>
   final Box<Task> box = Hive.box<Task>(boxName);
 
-  // add new task to the box
   Future<void> addTask({required Task task}) async {
-    await box.put(task.id, task);
+    try {
+      await box.put(task.id, task);
+    } catch (e) {
+      throw Exception('Failed to add task: $e');
+    }
   }
 
-  // show task
   Future<Task?> getTask({required String id}) async {
-    return box.get(id);
+    try {
+      return box.get(id);
+    } catch (e) {
+      throw Exception('Failed to get task: $e');
+    }
   }
 
-  // update task
-  Future<Task?> updateTask({required Task task}) async {
-    await task.save();
+  Future<void> updateTask({required Task task}) async {
+    try {
+      await task.save();
+    } catch (e) {
+      throw Exception('Failed to update task: $e');
+    }
   }
 
-  // delete task
-  Future<Task?> deleteTask({required Task task}) async {
-    await task.delete();
+  Future<void> deleteTask({required Task task}) async {
+    try {
+      await task.delete();
+    } catch (e) {
+      throw Exception('Failed to delete task: $e');
+    }
   }
 
-  // listen to the changes of the box
-  // using this method we will listen to the box changes and update 
-  // the UI accordingly
+  Future<void> deleteAllTasks() async {
+    try {
+      await box.clear();
+    } catch (e) {
+      throw Exception('Failed to delete all tasks: $e');
+    }
+  }
+
   ValueListenable<Box<Task>> listenToTask() => box.listenable();
 }

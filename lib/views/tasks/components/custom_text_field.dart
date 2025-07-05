@@ -14,40 +14,24 @@ class CustomTextField extends StatelessWidget {
       width: double.infinity,
 
       // add note and add description inputs
-      child: ListTile(title: AddNoteForm(isForDescription: isForDescription)),
-    );
-  }
-}
-
-class AddNoteForm extends StatefulWidget {
-  const AddNoteForm({super.key, required this.isForDescription});
-
-  final bool isForDescription;
-
-  @override
-  State<AddNoteForm> createState() => _AddNoteFormState();
-}
-
-class _AddNoteFormState extends State<AddNoteForm> {
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      maxLines: 1,
-      decoration: InputDecoration(
-        hintText: widget.isForDescription
-            ? AppStr.addNote
-            : AppStr.addTaskString,
-        hintStyle: TextStyle(color: Colors.grey),
-        prefixIcon: Icon(
-          widget.isForDescription ? Icons.bookmark_border : Icons.notes_rounded,
-          color: Colors.grey,
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: AppColors.primaryColor),
+      child: ListTile(
+        title: TextFormField(
+          maxLines: 1,
+          decoration: InputDecoration(
+            hintText: isForDescription ? AppStr.addNote : AppStr.addTaskString,
+            hintStyle: TextStyle(color: Colors.grey),
+            prefixIcon: Icon(
+              isForDescription ? Icons.bookmark_border : Icons.notes_rounded,
+              color: Colors.grey,
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppColors.primaryColor),
+            ),
+          ),
+          onFieldSubmitted: (value) {},
+          onChanged: (value) {},
         ),
       ),
-      onFieldSubmitted: (value) {},
-      onChanged: (value) {},
     );
   }
 }
